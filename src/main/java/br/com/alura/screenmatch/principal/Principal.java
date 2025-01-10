@@ -3,12 +3,15 @@ package br.com.alura.screenmatch.principal;
 import br.com.alura.screenmatch.Model.DadosEpisodio;
 import br.com.alura.screenmatch.Model.DadosSerie;
 import br.com.alura.screenmatch.Model.DadosTemporada;
+import br.com.alura.screenmatch.Model.Episodio;
 import br.com.alura.screenmatch.services.ConsumoApi;
 import br.com.alura.screenmatch.services.ConverteDados;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Principal {
     private final String ENDERECO = "https://www.omdbapi.com/?t=";
@@ -34,5 +37,23 @@ public class Principal {
 		}
 
         temporadas.forEach(t -> t.episodios().forEach(e -> System.out.println(e.Titulo())));
-    }
+
+        List<DadosEpisodio> dadosEpisodios = temporadas.stream()
+                .flatMap(t -> t.episodios().stream())
+                .collect(Collectors.toList());
+
+        System.out.println("Top 5 episódios: ");
+        dadosEpisodios.stream()
+                .filter(e -> !e.avaliacao().equalsIgnoreCase("N/A"))
+                .sorted(Comparator.comparing(DadosEpisodio::avaliacao).reversed())
+                .limit(5)
+                .forEach(System.out::println);
+
+        List<Episodio> episodios = temporadas.stream()
+                .flatMap(t -> t.episodios().stream()
+                        .map(d -> new Episodio(t.numeroTemp(), d)))
+                .collect(Collectors.toList());
+
+        episodios.forEach(System.out::println);
+        }
 }
